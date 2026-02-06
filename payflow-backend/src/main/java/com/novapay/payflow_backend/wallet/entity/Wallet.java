@@ -19,12 +19,16 @@ public class Wallet {
     private Long id;
     @Column(name = "wallet_number", unique = true, nullable = false)
     private String walletNumber;
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id", nullable = false,unique = true)
     private Long userId;
     @Enumerated(EnumType.STRING)
     private WalletStatus status;
     @Enumerated(EnumType.STRING)
     private CurrencyCode currency;
-    @Column(name = "created_at")
+    @Column(name = "created_at",updatable = false)
     private LocalDateTime createdAt;
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
 }
