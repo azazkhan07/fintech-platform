@@ -1,5 +1,7 @@
 package com.novapay.payflow_backend.wallet.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.novapay.payflow_backend.wallet.entity.enums.CurrencyCode;
 import com.novapay.payflow_backend.wallet.entity.enums.WalletStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -8,7 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
 @Setter
 public class WalletRequest {
@@ -30,7 +32,4 @@ public class WalletRequest {
     @Schema(example = "INR",description = "Wallet currency")
     @NotNull(message = "Currency is required")
     private CurrencyCode currency;
-    @Schema(example = "2026-02-06T12:30:00", description = "Wallet creation timestamp")
-    @PastOrPresent(message = "Creation time cannot be in the future")
-    private LocalDateTime creationAt;
 }
