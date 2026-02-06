@@ -1,4 +1,11 @@
 package com.novapay.payflow_backend.common.generator;
 
+import org.springframework.stereotype.Component;
+import java.util.UUID;
+
+@Component
 public class WalletNumberGenerator {
+    public String generate() {
+        return "WALLET-" + UUID.randomUUID().toString().substring(0, 8);
+    }
 }
