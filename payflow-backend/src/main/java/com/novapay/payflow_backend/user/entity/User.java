@@ -32,8 +32,4 @@ public class User {
     private String panNumber;
     @Column(name = "created_at")
     private LocalDateTime createdAt;
-
-
-
-
 }
