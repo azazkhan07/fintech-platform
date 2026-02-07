@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class User {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique = true, nullable = false)
     private String email;
@@ -23,13 +24,14 @@ public class User {
     @Column(nullable = false)
     private String gender;
     @Column(nullable = false)
-    private String mobileNumber;
+    private int age;
     @Column(nullable = false)
-    private Long aadhaarNumber;
+    private String mobileNumber;
     @Enumerated(EnumType.STRING)
     private UserStatus status;
-    @Column(nullable = false)
-    private String panNumber;
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

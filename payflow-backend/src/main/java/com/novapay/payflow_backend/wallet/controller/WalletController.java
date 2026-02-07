@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.*;
 public class WalletController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WalletController.class);
-    private WalletService walletService;
-    private WalletMapper walletMapper;
+    private  final WalletService walletService;
+    private final WalletMapper walletMapper;
 
     public WalletController(WalletService walletService, WalletMapper walletMapper) {
         this.walletService = walletService;
