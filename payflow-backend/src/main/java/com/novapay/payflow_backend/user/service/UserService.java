@@ -10,4 +10,10 @@ public interface UserService {
     User getUserById(Long userId);
 
     User updateUser(Long userId, UpdateUserRequest updateUserRequest);
+
+    void submitKyc(Long userId);
+
+    Boolean getKycStatus(Long userId);
+
+    void verifyKyc(Long  userId);
 }
