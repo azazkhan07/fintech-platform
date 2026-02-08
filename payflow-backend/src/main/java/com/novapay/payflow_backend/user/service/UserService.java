@@ -1,5 +1,6 @@
 package com.novapay.payflow_backend.user.service;
 
+import com.novapay.payflow_backend.user.dto.request.KycRequest;
 import com.novapay.payflow_backend.user.dto.request.UpdateUserRequest;
 import com.novapay.payflow_backend.user.entity.User;
 
@@ -11,7 +12,7 @@ public interface UserService {
 
     User updateUser(Long userId, UpdateUserRequest updateUserRequest);
 
-    void submitKyc(Long userId);
+    void submitKyc(Long userId, KycRequest kycRequest);
 
     Boolean getKycStatus(Long userId);
 

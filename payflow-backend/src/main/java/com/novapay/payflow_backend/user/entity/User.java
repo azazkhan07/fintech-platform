@@ -32,14 +32,18 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
     @Column(name = "kyc_verified")
-    private Boolean kycVerified;
-    @Column(name = "kyc_submitted_at")
+    private boolean kycVerified;
+    @Column(name = "kyc_submitted_at",nullable = true)
     private LocalDateTime kycSubmittedAt;
-
+    @Column(name = "aadhar_number",unique = true)
+    private String aadharNumber;
+    @Column(name = "pan_number", unique = true)
+    private String panNumber;
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
-        this.kycSubmittedAt = LocalDateTime.now();
+        this.kycVerified = false;
+        this.status = UserStatus.CREATED;
     }
 }
 

@@ -1,5 +1,6 @@
 package com.novapay.payflow_backend.user.service.impl;
 
+import com.novapay.payflow_backend.user.dto.request.KycRequest;
 import com.novapay.payflow_backend.user.dto.request.UpdateUserRequest;
 import com.novapay.payflow_backend.user.entity.User;
 import com.novapay.payflow_backend.user.enums.UserStatus;
@@ -13,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Transactional
 @Service
@@ -48,7 +51,6 @@ public class UserServiceImpl implements UserService {
         return userHelper.findUser(userId);
     }
 
-
     @Override
     public User updateUser(Long userId, UpdateUserRequest updateUserRequest) {
         User user = userHelper.findUser(userId);
@@ -57,16 +59,16 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-
     @Override
-    public void submitKyc(Long userId) {
+    public void submitKyc(Long userId, KycRequest kycRequest) {
         LOGGER.info("KYC submission started for user {}", userId);
         User user = userHelper.findUser(userId);
-        if (user.getKycVerified()) {
+        if (user.isKycVerified()) {
             throw new InvalidKycStateException("KYC has already been verified");
         }
         user.setStatus(UserStatus.PENDING_KYC);
         user.setKycVerified(false);
+        user.setKycSubmittedAt(LocalDateTime.now());
         LOGGER.info("KYC submission successfully for user {}", userId);
     }
 
@@ -75,9 +77,8 @@ public class UserServiceImpl implements UserService {
     public Boolean getKycStatus(Long userId) {
         User user = userHelper.findUser(userId);
         LOGGER.info("KYC status for user {}", userId);
-        return user.getKycVerified();
+        return user.isKycVerified();
     }
-
 
     @Override
     public void verifyKyc(Long userId) {

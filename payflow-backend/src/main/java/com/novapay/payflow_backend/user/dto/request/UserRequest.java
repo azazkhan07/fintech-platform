@@ -25,6 +25,4 @@ public class UserRequest {
     @Min(value = 18,message = "User must be at least 18")
     @Max(value = 99,message = "Age must be below 100")
     private int age;
-    @NotNull(message = "Status is Required")
-    private UserStatus status;
 }

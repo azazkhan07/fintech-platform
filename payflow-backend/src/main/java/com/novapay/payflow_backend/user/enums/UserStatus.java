@@ -4,5 +4,6 @@ public enum UserStatus {
     ACTIVE,
     INACTIVE,
     BLOCKED,
-    PENDING_KYC
+    PENDING_KYC,
+    CREATED
 }
