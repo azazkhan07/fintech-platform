@@ -1,6 +1,7 @@
 package com.novapay.payflow_backend.common.exception;
 
 import com.novapay.payflow_backend.common.dto.ApiError;
+import com.novapay.payflow_backend.user.exception.InvalidKycStateException;
 import com.novapay.payflow_backend.user.exception.UserAlreadyExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +79,17 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now()
         );
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(InvalidKycStateException.class)
+    public ResponseEntity<ApiError> handleInvalidKycState(InvalidKycStateException ex) {
+        ApiError apiError = new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.name(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
 }
