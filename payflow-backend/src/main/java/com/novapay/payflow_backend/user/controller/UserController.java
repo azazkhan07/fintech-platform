@@ -1,5 +1,6 @@
 package com.novapay.payflow_backend.user.controller;
 
+import com.novapay.payflow_backend.user.dto.request.UpdateUserRequest;
 import com.novapay.payflow_backend.user.dto.request.UserRequest;
 import com.novapay.payflow_backend.user.dto.response.UserResponse;
 import com.novapay.payflow_backend.user.entity.User;
@@ -32,7 +33,7 @@ public class UserController {
 
     @Operation(summary = "User Created")
     @ApiResponses({@ApiResponse(responseCode = "201", description = "User Created"),
-            @ApiResponse(responseCode = "409", description = "User already exists")})
+    @ApiResponse(responseCode = "409", description = "User already exists")})
     @PostMapping
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserRequest userRequest) {
         User user = userMapper.toUserEntity(userRequest);
@@ -43,11 +44,20 @@ public class UserController {
 
     @Operation(summary = "Get User By Id")
     @ApiResponses({@ApiResponse(responseCode = "200", description = "User Found"),
-            @ApiResponse(responseCode = "404", description = "User Not Found")})
+    @ApiResponse(responseCode = "404", description = "User Not Found")})
     @GetMapping("/{userId}")
     public ResponseEntity<UserResponse> getUser(@PathVariable Long userId) {
         User user = userService.getUserById(userId);
         LOGGER.info("User found with id {} ", user.getId());
         return ResponseEntity.status(HttpStatus.OK).body(userMapper.toResponseDTO(user));
+    }
+    @Operation(summary = "User update by id")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "User updated"),
+    @ApiResponse(responseCode = "404", description = "User not found")})
+    @PatchMapping("/{userId}")
+    public ResponseEntity<UserResponse> updateUser(@PathVariable Long userId, @Valid @RequestBody  UpdateUserRequest updateUserRequest) {
+        User updatedUser = userService.updateUser(userId, updateUserRequest);
+        LOGGER.info("User updated with id {} ", updatedUser.getId());
+        return ResponseEntity.status(HttpStatus.OK).body(userMapper.toResponseDTO(updatedUser));
     }
 }

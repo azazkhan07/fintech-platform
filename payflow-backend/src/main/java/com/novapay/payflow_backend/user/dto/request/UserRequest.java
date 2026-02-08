@@ -6,6 +6,7 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
+
 @Setter
 @Getter
 public class UserRequest {
@@ -19,7 +20,7 @@ public class UserRequest {
     @NotBlank(message = "Gender is required")
     private String gender;
     @NotBlank(message = "Mobile Number Must be Required")
-    @Pattern(regexp = "^[6-9]\\d{9}$", message = "Invalid Indian mobile number")
+    @Pattern(regexp = "^[6-9]\\d{9}$", message = "Invalid mobile number")
     private String mobileNumber;
     @Min(value = 18,message = "User must be at least 18")
     @Max(value = 99,message = "Age must be below 100")
