@@ -2,17 +2,21 @@ package com.novapay.payflow_backend.wallet.service.impl;
 
 import com.novapay.payflow_backend.common.exception.ResourceNotFoundException;
 import com.novapay.payflow_backend.common.exception.WalletAlreadyExistsException;
-import com.novapay.payflow_backend.common.generator.WalletNumberGenerator;
+import com.novapay.payflow_backend.common.util.generator.WalletNumberGenerator;
+import com.novapay.payflow_backend.common.util.validator.WalletHelper;
+import com.novapay.payflow_backend.wallet.dto.response.WalletResponse;
 import com.novapay.payflow_backend.wallet.entity.Wallet;
 import com.novapay.payflow_backend.wallet.entity.WalletBalance;
 import com.novapay.payflow_backend.wallet.entity.enums.CurrencyCode;
 import com.novapay.payflow_backend.wallet.entity.enums.WalletStatus;
+import com.novapay.payflow_backend.wallet.mapper.WalletMapper;
 import com.novapay.payflow_backend.wallet.repository.WallentBalanceRepository;
 import com.novapay.payflow_backend.wallet.repository.WalletRepository;
 import com.novapay.payflow_backend.wallet.service.WalletService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -25,16 +29,21 @@ public class WalletServiceImpl implements WalletService {
     private final WalletRepository walletRepository;
     private final WallentBalanceRepository walletBalanceRepository;
     private final WalletNumberGenerator walletNumberGenerator;
+    private final WalletMapper walletMapper;
+    private final WalletHelper walletHelper;
 
-    public WalletServiceImpl(WalletRepository walletRepository, WallentBalanceRepository walletBalanceRepository, WalletNumberGenerator walletNumberGenerator) {
+    public WalletServiceImpl(WalletRepository walletRepository, WallentBalanceRepository walletBalanceRepository, WalletNumberGenerator walletNumberGenerator, WalletMapper walletMapper, WalletHelper walletHelper) {
         this.walletRepository = walletRepository;
         this.walletBalanceRepository = walletBalanceRepository;
         this.walletNumberGenerator = walletNumberGenerator;
+        this.walletMapper = walletMapper;
+        this.walletHelper = walletHelper;
     }
 
+    @Transactional
     @Override
-    public Wallet createWallet(Long userId) {
-
+    public WalletResponse createWallet(Long userId) {
+         walletHelper.findWalletById(userId);
         if (walletRepository.existsByUserId(userId)) {
             throw new WalletAlreadyExistsException("Wallet already exists for userId" + userId);
         }
@@ -54,16 +63,17 @@ public class WalletServiceImpl implements WalletService {
                 .blockedBalance(BigDecimal.ZERO)
                 .updatedAt(LocalDateTime.now())
                 .build();
-        WalletBalance balance = walletBalanceRepository.save(walletBalance);
+        walletBalanceRepository.save(walletBalance);
         LOGGER.info("Wallet created for userId {} walletNumber {} ", userId, saveWallet.getWalletNumber());
-        return saveWallet;
+        return walletMapper.toResponseDTO(saveWallet);
     }
 
     @Override
-    public Wallet getWalletByUserId(Long userId) {
+    public WalletResponse getWalletByUserId(Long userId) {
         LOGGER.info("Get wallet by user id {}", userId);
-        return walletRepository
+        Wallet wallet = walletRepository
                 .findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Wallet Not Found For UserId " + userId));
+        return walletMapper.toResponseDTO(wallet);
     }
 }
