@@ -33,7 +33,7 @@ public class User {
     private LocalDateTime createdAt;
     @Column(name = "kyc_verified")
     private boolean kycVerified;
-    @Column(name = "kyc_submitted_at",nullable = true)
+    @Column(name = "kyc_submitted_at")
     private LocalDateTime kycSubmittedAt;
     @Column(name = "aadhar_number",unique = true)
     private String aadharNumber;
@@ -46,5 +46,3 @@ public class User {
         this.status = UserStatus.CREATED;
     }
 }
-
-
