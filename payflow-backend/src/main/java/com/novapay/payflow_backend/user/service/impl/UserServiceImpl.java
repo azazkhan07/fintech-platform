@@ -2,6 +2,8 @@ package com.novapay.payflow_backend.user.service.impl;
 
 import com.novapay.payflow_backend.user.dto.request.KycRequest;
 import com.novapay.payflow_backend.user.dto.request.UpdateUserRequest;
+import com.novapay.payflow_backend.user.dto.request.UserRequest;
+import com.novapay.payflow_backend.user.dto.response.UserResponse;
 import com.novapay.payflow_backend.user.entity.User;
 import com.novapay.payflow_backend.user.enums.UserStatus;
 import com.novapay.payflow_backend.user.exception.InvalidKycStateException;
@@ -34,29 +36,31 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public User createUser(User user) {
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new UserAlreadyExistsException("User already exists with email {} " + user.getEmail());
+    public UserResponse createUser(UserRequest userRequest) {
+        if (userRepository.existsByEmail(userRequest.getEmail())) {
+            throw new UserAlreadyExistsException("User already exists with email " + userRequest.getEmail());
         }
+        User user = userMapper.toUserEntity(userRequest);
         user.setStatus(UserStatus.ACTIVE);
-        User savedUser = userRepository.save(user);
-        LOGGER.info("User created with id {} and email {} ", savedUser.getId(), savedUser.getEmail());
-        return savedUser;
+        User saveUser = userRepository.save(user);
+        LOGGER.info("User created with id {} and email {} ", user.getId(), user.getEmail());
+        return userMapper.toResponseDTO(saveUser);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public User getUserById(Long userId) {
-        LOGGER.info("Getting User by id {}", userId);
-        return userHelper.findUser(userId);
+    public UserResponse getUserById(Long userId) {
+        User user = userHelper.findUser(userId);
+        LOGGER.info("Getting User by id {} ", userId);
+        return userMapper.toResponseDTO(user);
     }
 
     @Override
-    public User updateUser(Long userId, UpdateUserRequest updateUserRequest) {
+    public UserResponse updateUser(Long userId, UpdateUserRequest updateUserRequest) {
         User user = userHelper.findUser(userId);
         userMapper.updateUserFromDto(updateUserRequest, user);
         LOGGER.info("User updated with id {} ", userId);
-        return user;
+        return userMapper.toResponseDTO(user);
     }
 
     @Override
@@ -66,6 +70,8 @@ public class UserServiceImpl implements UserService {
         if (user.isKycVerified()) {
             throw new InvalidKycStateException("KYC has already been verified");
         }
+        userMapper.updateKycFromDto(kycRequest, user);
+       
         user.setStatus(UserStatus.PENDING_KYC);
         user.setKycVerified(false);
         user.setKycSubmittedAt(LocalDateTime.now());

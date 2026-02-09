@@ -1,5 +1,6 @@
 package com.novapay.payflow_backend.user.mapper;
 
+import com.novapay.payflow_backend.user.dto.request.KycRequest;
 import com.novapay.payflow_backend.user.dto.request.UpdateUserRequest;
 import com.novapay.payflow_backend.user.dto.request.UserRequest;
 import com.novapay.payflow_backend.user.dto.response.UserResponse;
@@ -16,4 +17,6 @@ public interface UserMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateUserFromDto(UpdateUserRequest dto, @MappingTarget User entity);
+
+    void updateKycFromDto(KycRequest dto, @MappingTarget User entity);
 }

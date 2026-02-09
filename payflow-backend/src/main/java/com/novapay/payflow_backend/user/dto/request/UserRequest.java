@@ -1,6 +1,6 @@
 package com.novapay.payflow_backend.user.dto.request;
 
-import com.novapay.payflow_backend.user.enums.UserStatus;
+
 import com.novapay.payflow_backend.user.util.ValidGender;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
