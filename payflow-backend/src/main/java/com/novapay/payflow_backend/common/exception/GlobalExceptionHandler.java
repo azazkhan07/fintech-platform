@@ -1,10 +1,16 @@
 package com.novapay.payflow_backend.common.exception;
 
 import com.novapay.payflow_backend.common.dto.ApiError;
+import com.novapay.payflow_backend.user.exception.InvalidKycStateException;
+import com.novapay.payflow_backend.user.exception.UserAlreadyExistsException;
+import org.hibernate.property.access.spi.PropertyAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.jpa.JpaSystemException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -28,7 +34,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiError> handleNotFoundException(ResourceNotFoundException exception) {
+    public ResponseEntity<ApiError> resourceNotFoundException(ResourceNotFoundException exception) {
         ApiError apiError = new ApiError(
                 HttpStatus.NOT_FOUND.value(),
                 HttpStatus.NOT_FOUND.name(),
@@ -50,8 +56,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiError> handleValidationException(
-            MethodArgumentNotValidException ex) {
+    public ResponseEntity<ApiError> handleValidationException(MethodArgumentNotValidException ex) {
 
         String message = ex.getBindingResult()
                 .getFieldErrors()
@@ -64,9 +69,98 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 HttpStatus.BAD_REQUEST.name(),
                 message,
+                LocalDateTime.now());
+        LOGGER.info("Validation error occurred: {}", message);
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<ApiError> userAlreadyExistsException(UserAlreadyExistsException exception) {
+        ApiError error = new ApiError(
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.name(),
+                exception.getMessage(),
                 LocalDateTime.now()
         );
+        LOGGER.info("User already exists: {}", exception.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(InvalidKycStateException.class)
+    public ResponseEntity<ApiError> handleInvalidKycState(InvalidKycStateException ex) {
+        ApiError apiError = new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.name(),
+                ex.getMessage(),
+                LocalDateTime.now());
+        LOGGER.info("Invalid Kyc State: {}", ex.getMessage());
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<ApiError> badRequest(NullPointerException nullPointerException) {
+        ApiError apiError = new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.name(),
+                nullPointerException.getMessage(),
+                LocalDateTime.now());
+        LOGGER.info("Bad Request: {}", nullPointerException.getMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(PropertyAccessException.class)
+    public ResponseEntity<ApiError> propertyAccessException(PropertyAccessException exception) {
+        ApiError apiError = new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.name(),
+                exception.getMessage(),
+                LocalDateTime.now());
+        LOGGER.info("Property Access Exception: {}", exception.getMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiError> illegalArgumentException(IllegalArgumentException exception) {
+        ApiError apiError = new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.name(),
+                exception.getMessage(),
+                LocalDateTime.now());
+        LOGGER.info("Illegal Argument Exception: {}", exception.getMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(JpaSystemException.class)
+    public ResponseEntity<ApiError> jpaSystemException(JpaSystemException exception) {
+        ApiError apiError = new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.name(),
+                exception.getMessage(),
+                LocalDateTime.now());
+        LOGGER.info("JpaSystem Exception: {}", exception.getMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiError>httpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException exception) {
+        ApiError apiError = new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.name(),
+                exception.getMessage(),
+                LocalDateTime.now());
+        LOGGER.info("Method Not Supported: {}", exception.getMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleDatabaseError(DataIntegrityViolationException ex) {
+
+        ApiError error = new ApiError(
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.name(),
+                "Database constraint violation (duplicate or invalid data)",
+                LocalDateTime.now());
+
+        LOGGER.error("Database error", ex);
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 
 }

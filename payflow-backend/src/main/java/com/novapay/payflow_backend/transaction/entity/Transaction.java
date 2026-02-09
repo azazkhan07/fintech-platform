@@ -21,21 +21,13 @@ public class Transaction {
     private Long id;
     @Column(unique = true, nullable = false)
     private String referenceId;
-    @Column(name = "sender_wallet_id", nullable = false)
     private Long senderWalletId;
-    @Column(name = "receiver_wallet_id", nullable = false)
     private Long receiverWalletId;
-    @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal amount;
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private TransactionType type;
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
-    @Column(name = "failure_reason")
-    private String failureReason;
-    private String remarks;
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
