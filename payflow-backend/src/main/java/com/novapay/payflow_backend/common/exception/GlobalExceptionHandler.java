@@ -6,6 +6,7 @@ import com.novapay.payflow_backend.user.exception.UserAlreadyExistsException;
 import org.hibernate.property.access.spi.PropertyAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -33,7 +34,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiError> handleNotFoundException(ResourceNotFoundException exception) {
+    public ResponseEntity<ApiError> resourceNotFoundException(ResourceNotFoundException exception) {
         ApiError apiError = new ApiError(
                 HttpStatus.NOT_FOUND.value(),
                 HttpStatus.NOT_FOUND.name(),
@@ -55,8 +56,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiError> handleValidationException(
-            MethodArgumentNotValidException ex) {
+    public ResponseEntity<ApiError> handleValidationException(MethodArgumentNotValidException ex) {
 
         String message = ex.getBindingResult()
                 .getFieldErrors()
@@ -150,4 +150,17 @@ public class GlobalExceptionHandler {
         LOGGER.info("Method Not Supported: {}", exception.getMessage());
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleDatabaseError(DataIntegrityViolationException ex) {
+
+        ApiError error = new ApiError(
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.name(),
+                "Database constraint violation (duplicate or invalid data)",
+                LocalDateTime.now());
+
+        LOGGER.error("Database error", ex);
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
 }
