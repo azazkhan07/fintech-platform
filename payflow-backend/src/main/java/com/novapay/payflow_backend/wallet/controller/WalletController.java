@@ -1,3 +1,4 @@
+
 package com.novapay.payflow_backend.wallet.controller;
 
 import com.novapay.payflow_backend.wallet.dto.request.WalletRequest;
@@ -29,7 +30,7 @@ public class WalletController {
     }
     @Operation(summary = "Create wallet for user")
     @ApiResponses({@ApiResponse(responseCode = "201", description = "Wallet created"),
-    @ApiResponse(responseCode = "409", description = "Wallet already exists")})
+            @ApiResponse(responseCode = "409", description = "Wallet already exists")})
     @PostMapping()
     public ResponseEntity<WalletResponse> createWallet(@Valid @RequestBody WalletRequest walletRequest) {
         LOGGER.info("Creating wallet for user {}", walletRequest.getUserId());
@@ -38,7 +39,7 @@ public class WalletController {
     }
     @Operation(summary = "Get wallet for user")
     @ApiResponses({@ApiResponse(responseCode = "200", description = "Wallet Found"),
-    @ApiResponse(responseCode = "404", description = "Wallet Not Found")})
+            @ApiResponse(responseCode = "404", description = "Wallet Not Found")})
     @GetMapping("/{userId}")
     public ResponseEntity<WalletResponse> getWallet(@PathVariable Long userId) {
         WalletResponse response = walletService.getWalletByUserId(userId);

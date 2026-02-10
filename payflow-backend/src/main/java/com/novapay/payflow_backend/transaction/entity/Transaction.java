@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "transactions")
@@ -30,9 +31,12 @@ public class Transaction {
     private TransactionStatus status;
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+    private String remarks;
+    private String message;
 
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
+        this.referenceId = UUID.randomUUID().toString();
     }
 }

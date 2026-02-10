@@ -1,14 +1,101 @@
 package com.novapay.payflow_backend.transaction.service.impl;
 
+import com.novapay.payflow_backend.common.exception.ResourceNotFoundException;
 import com.novapay.payflow_backend.transaction.dto.request.TransactionRequest;
 import com.novapay.payflow_backend.transaction.dto.response.TransactionResponse;
+import com.novapay.payflow_backend.transaction.entity.Transaction;
+import com.novapay.payflow_backend.transaction.entity.enums.TransactionStatus;
+import com.novapay.payflow_backend.transaction.entity.enums.TransactionType;
+import com.novapay.payflow_backend.transaction.repository.TransactionRepository;
 import com.novapay.payflow_backend.transaction.service.TransactionService;
+import com.novapay.payflow_backend.wallet.entity.WalletBalance;
+import com.novapay.payflow_backend.wallet.repository.WallentBalanceRepository;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 
 @Service
+@RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionServiceImpl.class);
+
+    private final TransactionRepository transactionRepository;
+    private final WallentBalanceRepository wallentBalanceRepository;
+
+    @Transactional
     @Override
     public TransactionResponse transferMoney(TransactionRequest request) {
-        return null;
+
+        LOGGER.info("Transfer request received | senderWalletId={} receiverWalletId={} amount={}",
+                request.getSenderWalletId(), request.getReceiverWalletId(), request.getAmount());
+
+        if (request.getSenderWalletId().equals(request.getReceiverWalletId())) {
+            LOGGER.warn("Transfer failed: Sender and Receiver wallet are same | walletId={}",
+                    request.getSenderWalletId());
+            throw new IllegalArgumentException("Sender and Receiver cannot be same");
+        }
+
+        WalletBalance sender = wallentBalanceRepository
+                .findByWalletId(request.getSenderWalletId())
+                .orElseThrow(() -> {
+                    LOGGER.warn("Transfer failed: Sender wallet not found | walletId={}",
+                            request.getSenderWalletId());
+                    return new ResourceNotFoundException("Sender wallet not found");
+                });
+
+        WalletBalance receiver = wallentBalanceRepository
+                .findByWalletId(request.getReceiverWalletId())
+                .orElseThrow(() -> {
+                    LOGGER.warn("Transfer failed: Receiver wallet not found | walletId={}",
+                            request.getReceiverWalletId());
+                    return new ResourceNotFoundException("Receiver wallet not found");
+                });
+
+        BigDecimal amount = request.getAmount();
+
+        if (sender.getAvailableBalance().compareTo(amount) < 0) {
+            LOGGER.warn("Transfer failed: Insufficient balance | walletId={} balance={} attemptedAmount={}",
+                    request.getSenderWalletId(),
+                    sender.getAvailableBalance(),
+                    amount);
+            throw new IllegalArgumentException("Insufficient funds");
+        }
+
+        sender.setAvailableBalance(sender.getAvailableBalance().subtract(amount));
+        receiver.setAvailableBalance(receiver.getAvailableBalance().add(amount));
+
+        wallentBalanceRepository.save(sender);
+        wallentBalanceRepository.save(receiver);
+
+        LOGGER.info("Wallet balances updated | senderWalletId={} receiverWalletId={} amount={}",
+                request.getSenderWalletId(), request.getReceiverWalletId(), amount);
+
+        Transaction transaction = Transaction.builder()
+                .senderWalletId(request.getSenderWalletId())
+                .receiverWalletId(request.getReceiverWalletId())
+                .amount(amount)
+                .type(TransactionType.TRANSFER)
+                .status(TransactionStatus.SUCCESS)
+                .remarks(request.getRemarks())
+                .message("Transfer Successful")
+                .build();
+
+        Transaction savedTransaction = transactionRepository.save(transaction);
+
+        LOGGER.info("Transaction completed successfully | referenceId={}", savedTransaction.getReferenceId());
+
+        return TransactionResponse.builder()
+                .referenceId(savedTransaction.getReferenceId())
+                .status(savedTransaction.getStatus())
+                .amount(savedTransaction.getAmount())
+                .createdAt(savedTransaction.getCreatedAt())
+                .remark(savedTransaction.getRemarks())
+                .message(savedTransaction.getMessage())
+                .build();
     }
 }
