@@ -2,8 +2,6 @@ package com.novapay.payflow_backend.wallet.controller;
 
 import com.novapay.payflow_backend.wallet.dto.request.WalletRequest;
 import com.novapay.payflow_backend.wallet.dto.response.WalletResponse;
-import com.novapay.payflow_backend.wallet.entity.Wallet;
-import com.novapay.payflow_backend.wallet.mapper.WalletMapper;
 import com.novapay.payflow_backend.wallet.service.WalletService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -22,29 +20,29 @@ import org.springframework.web.bind.annotation.*;
 public class WalletController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WalletController.class);
-    private WalletService walletService;
-    private WalletMapper walletMapper;
+    private  final WalletService walletService;
 
-    public WalletController(WalletService walletService, WalletMapper walletMapper) {
+
+    public WalletController(WalletService walletService) {
         this.walletService = walletService;
-        this.walletMapper = walletMapper;
+
     }
     @Operation(summary = "Create wallet for user")
     @ApiResponses({@ApiResponse(responseCode = "201", description = "Wallet created"),
-                  @ApiResponse(responseCode = "409", description = "Wallet already exists")})
+    @ApiResponse(responseCode = "409", description = "Wallet already exists")})
     @PostMapping()
     public ResponseEntity<WalletResponse> createWallet(@Valid @RequestBody WalletRequest walletRequest) {
         LOGGER.info("Creating wallet for user {}", walletRequest.getUserId());
-        Wallet wallet = walletService.createWallet(walletRequest.getUserId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(walletMapper.toResponseDTO(wallet));
+        WalletResponse response = walletService.createWallet(walletRequest.getUserId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
     @Operation(summary = "Get wallet for user")
     @ApiResponses({@ApiResponse(responseCode = "200", description = "Wallet Found"),
-                   @ApiResponse(responseCode = "404", description = "Wallet Not Found")})
+    @ApiResponse(responseCode = "404", description = "Wallet Not Found")})
     @GetMapping("/{userId}")
     public ResponseEntity<WalletResponse> getWallet(@PathVariable Long userId) {
-        Wallet wallet = walletService.getWalletByUserId(userId);
+        WalletResponse response = walletService.getWalletByUserId(userId);
         LOGGER.info("Retrieving wallet with id {}", userId);
-        return ResponseEntity.status(HttpStatus.OK).body(walletMapper.toResponseDTO(wallet));
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
