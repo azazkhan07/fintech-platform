@@ -21,11 +21,8 @@ public class Transaction {
     private Long id;
     @Column(unique = true, nullable = false)
     private String referenceId;
-    @Column(name = "sender_wallet_id")
     private Long senderWalletId;
-    @Column(name = "receiver_wallet_id")
     private Long receiverWalletId;
-    @Column(name = "amount")
     private BigDecimal amount;
     @Enumerated(EnumType.STRING)
     private TransactionType type;
