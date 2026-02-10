@@ -1,9 +1,9 @@
+
 package com.novapay.payflow_backend.wallet.service.impl;
 
 import com.novapay.payflow_backend.common.exception.ResourceNotFoundException;
 import com.novapay.payflow_backend.common.exception.WalletAlreadyExistsException;
 import com.novapay.payflow_backend.common.util.generator.WalletNumberGenerator;
-import com.novapay.payflow_backend.common.util.validator.WalletHelper;
 import com.novapay.payflow_backend.wallet.dto.response.WalletResponse;
 import com.novapay.payflow_backend.wallet.entity.Wallet;
 import com.novapay.payflow_backend.wallet.entity.WalletBalance;
@@ -30,20 +30,19 @@ public class WalletServiceImpl implements WalletService {
     private final WallentBalanceRepository walletBalanceRepository;
     private final WalletNumberGenerator walletNumberGenerator;
     private final WalletMapper walletMapper;
-    private final WalletHelper walletHelper;
 
-    public WalletServiceImpl(WalletRepository walletRepository, WallentBalanceRepository walletBalanceRepository, WalletNumberGenerator walletNumberGenerator, WalletMapper walletMapper, WalletHelper walletHelper) {
+
+    public WalletServiceImpl(WalletRepository walletRepository, WallentBalanceRepository walletBalanceRepository, WalletNumberGenerator walletNumberGenerator, WalletMapper walletMapper) {
         this.walletRepository = walletRepository;
         this.walletBalanceRepository = walletBalanceRepository;
         this.walletNumberGenerator = walletNumberGenerator;
         this.walletMapper = walletMapper;
-        this.walletHelper = walletHelper;
     }
 
     @Transactional
     @Override
     public WalletResponse createWallet(Long userId) {
-         walletHelper.findWalletById(userId);
+
         if (walletRepository.existsByUserId(userId)) {
             throw new WalletAlreadyExistsException("Wallet already exists for userId" + userId);
         }
@@ -55,17 +54,17 @@ public class WalletServiceImpl implements WalletService {
                 .currency(CurrencyCode.INR)
                 .build();
 
-        Wallet saveWallet = walletRepository.save(wallet);
+        Wallet savedWallet = walletRepository.save(wallet);
 
         WalletBalance walletBalance = WalletBalance.builder()
-                .wallet(saveWallet)
+                .wallet(savedWallet)
                 .availableBalance(BigDecimal.ZERO)
                 .blockedBalance(BigDecimal.ZERO)
                 .updatedAt(LocalDateTime.now())
                 .build();
         walletBalanceRepository.save(walletBalance);
-        LOGGER.info("Wallet created for userId {} walletNumber {} ", userId, saveWallet.getWalletNumber());
-        return walletMapper.toResponseDTO(saveWallet);
+        LOGGER.info("Wallet created for userId {} walletNumber {} ", userId, savedWallet.getWalletNumber());
+        return walletMapper.toResponseDTO(savedWallet);
     }
 
     @Override
