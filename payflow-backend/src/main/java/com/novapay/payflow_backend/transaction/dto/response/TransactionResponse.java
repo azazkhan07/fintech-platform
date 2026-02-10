@@ -16,6 +16,11 @@ public record TransactionResponse(
         @Schema(example = "PENDING")
         TransactionStatus status,
         @Schema(example = "2026-02-06T12:30:00")
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        @Schema(example = "Transaction Successful")
+        String remark,
+        @Schema(example = "Payment transfer successful")
+        String message
+
 ) {}
 
