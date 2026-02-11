@@ -1,6 +1,5 @@
 package com.novapay.payflow_backend.wallet.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.novapay.payflow_backend.wallet.entity.enums.CurrencyCode;
 import com.novapay.payflow_backend.wallet.entity.enums.WalletStatus;
@@ -9,7 +8,6 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
 @Setter
