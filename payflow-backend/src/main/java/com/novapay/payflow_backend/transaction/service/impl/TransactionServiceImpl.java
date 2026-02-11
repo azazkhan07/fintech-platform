@@ -14,9 +14,13 @@ import com.novapay.payflow_backend.wallet.repository.WallentBalanceRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.math.BigDecimal;
+
 
 @Service
 @RequiredArgsConstructor
@@ -104,5 +108,19 @@ public class TransactionServiceImpl implements TransactionService {
                 transaction.getStatus(),
                 transaction.getAmount());
         return transactionMapper.toTransactionResponse(transaction);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<TransactionResponse> getWalletTransactionHistory(Long walletId, Pageable pageable) {
+
+        LOGGER.info("Fetching transaction history for wallet={} page={} size={}", walletId, pageable.getPageNumber(), pageable.getPageSize());
+
+        Page<Transaction> transactionsPage = transactionRepository.findBySenderWalletIdOrReceiverWalletId(walletId, walletId, pageable);
+
+        LOGGER.info("Wallet transaction history fetch| walletId={} totalRecords={}",
+                walletId, transactionsPage.getTotalElements());
+
+        return transactionsPage.map(transactionMapper::toTransactionResponse);
     }
 }
