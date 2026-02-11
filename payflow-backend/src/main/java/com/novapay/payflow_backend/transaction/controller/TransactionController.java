@@ -2,6 +2,7 @@ package com.novapay.payflow_backend.transaction.controller;
 
 import com.novapay.payflow_backend.transaction.dto.request.TransactionRequest;
 import com.novapay.payflow_backend.transaction.dto.response.TransactionResponse;
+import com.novapay.payflow_backend.transaction.dto.response.TransactionStatusResponse;
 import com.novapay.payflow_backend.transaction.service.TransactionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -31,10 +32,10 @@ public class TransactionController {
 
     @Operation(summary = "Transfer money between wallets")
     @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Transfer successful"),
-    @ApiResponse(responseCode = "400", description = "Invalid request / insufficient balance"),
-    @ApiResponse(responseCode = "404", description = "Wallet not found"),
-    @ApiResponse(responseCode = "500", description = "Internal server error")})
+            @ApiResponse(responseCode = "200", description = "Transfer successful"),
+            @ApiResponse(responseCode = "400", description = "Invalid request / insufficient balance"),
+            @ApiResponse(responseCode = "404", description = "Wallet not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")})
     @PostMapping("/transfer")
     public ResponseEntity<TransactionResponse> transferMoney(@Valid @RequestBody TransactionRequest transactionRequest) {
 
@@ -50,7 +51,7 @@ public class TransactionController {
 
     @Operation(summary = "Get transaction by reference id")
     @ApiResponses({@ApiResponse(responseCode = "200", description = "Transaction found"),
-    @ApiResponse(responseCode = "404", description = "Transaction not found")})
+            @ApiResponse(responseCode = "404", description = "Transaction not found")})
     @GetMapping("/{referenceId}")
     public ResponseEntity<TransactionResponse> getTransaction(@PathVariable String referenceId) {
         TransactionResponse response = transactionService.getTransactionByReferenceId(referenceId);
@@ -60,7 +61,7 @@ public class TransactionController {
 
     @Operation(summary = "Get wallet transaction history")
     @ApiResponses({@ApiResponse(responseCode = "200", description = "Transaction history fetched"),
-    @ApiResponse(responseCode = "404", description = "Wallet not found")})
+            @ApiResponse(responseCode = "404", description = "Wallet not found")})
     @GetMapping("/wallet/{walletId}")
     public ResponseEntity<Page<TransactionResponse>> getWalletHistory(
             @PathVariable Long walletId,
@@ -75,6 +76,15 @@ public class TransactionController {
                 Sort.by(Sort.Direction.fromString(sortDirection), sortBy));
 
         LOGGER.info("History request | walletId={}, page={}, size={} sortDirection={}", walletId, page, size, sortDirection);
-        return ResponseEntity.status(HttpStatus.OK).body(transactionService.getWalletTransactionHistory(walletId,pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(transactionService.getWalletTransactionHistory(walletId, pageable));
+    }
+
+    @Operation(summary = "Get transaction status")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Transaction status fetched"),
+            @ApiResponse(responseCode = "404", description = "Transaction status not found")})
+    @GetMapping("/status/{referenceId}")
+    public ResponseEntity<TransactionStatusResponse> getTransactionStatus(@PathVariable String referenceId) {
+        LOGGER.info("Fetching transaction status for referenceId: {}", referenceId);
+        return ResponseEntity.status(HttpStatus.OK).body(transactionService.getTransactionStatusByReferenceId(referenceId));
     }
 }
