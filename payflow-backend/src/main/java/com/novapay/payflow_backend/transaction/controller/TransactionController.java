@@ -13,10 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Transaction APIs", description = "Money transfer endpoints")
 @RestController
@@ -38,12 +35,22 @@ public class TransactionController {
     public ResponseEntity<TransactionResponse> transferMoney(@Valid @RequestBody TransactionRequest transactionRequest) {
 
         LOGGER.info("Incoming transfer request | sender={} receiver={} amount={}",
-               transactionRequest.getSenderWalletId(),
+                transactionRequest.getSenderWalletId(),
                 transactionRequest.getReceiverWalletId(),
                 transactionRequest.getAmount());
         TransactionResponse transactionResponse = transactionService.transferMoney(transactionRequest);
 
         LOGGER.info("Transfer completed successfully referenceId: {}", transactionResponse.referenceId());
         return ResponseEntity.status(HttpStatus.OK).body(transactionResponse);
+    }
+
+    @Operation(summary = "Get transaction by reference id")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Transaction found"),
+    @ApiResponse(responseCode = "404", description = "Transaction not found")})
+    @GetMapping("/{referenceId}")
+    public ResponseEntity<TransactionResponse> getTransaction(@PathVariable String referenceId) {
+        TransactionResponse response = transactionService.getTransactionByReferenceId(referenceId);
+        LOGGER.info("Transaction found with referenceId: {}", referenceId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

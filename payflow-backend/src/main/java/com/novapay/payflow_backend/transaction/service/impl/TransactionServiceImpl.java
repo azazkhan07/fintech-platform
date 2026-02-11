@@ -6,6 +6,7 @@ import com.novapay.payflow_backend.transaction.dto.response.TransactionResponse;
 import com.novapay.payflow_backend.transaction.entity.Transaction;
 import com.novapay.payflow_backend.transaction.entity.enums.TransactionStatus;
 import com.novapay.payflow_backend.transaction.entity.enums.TransactionType;
+import com.novapay.payflow_backend.transaction.mapper.TransactionMapper;
 import com.novapay.payflow_backend.transaction.repository.TransactionRepository;
 import com.novapay.payflow_backend.transaction.service.TransactionService;
 import com.novapay.payflow_backend.wallet.entity.WalletBalance;
@@ -15,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 
 @Service
@@ -26,6 +26,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final WallentBalanceRepository wallentBalanceRepository;
+    private final TransactionMapper transactionMapper;
 
     @Transactional
     @Override
@@ -88,14 +89,20 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction savedTransaction = transactionRepository.save(transaction);
 
         LOGGER.info("Transaction completed successfully | referenceId={}", savedTransaction.getReferenceId());
+        return transactionMapper.toTransactionResponse(savedTransaction);
+    }
 
-        return TransactionResponse.builder()
-                .referenceId(savedTransaction.getReferenceId())
-                .status(savedTransaction.getStatus())
-                .amount(savedTransaction.getAmount())
-                .createdAt(savedTransaction.getCreatedAt())
-                .remark(savedTransaction.getRemarks())
-                .message(savedTransaction.getMessage())
-                .build();
+    @Transactional(readOnly = true)
+    @Override
+    public TransactionResponse getTransactionByReferenceId(String referenceId) {
+        LOGGER.info("Fetching transaction with reference {}", referenceId);
+        Transaction transaction = transactionRepository
+                .findByReferenceId(referenceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with reference " + referenceId));
+        LOGGER.info("Transaction fetched successfully | referenceId={} status={} amount={}",
+                transaction.getReferenceId(),
+                transaction.getStatus(),
+                transaction.getAmount());
+        return transactionMapper.toTransactionResponse(transaction);
     }
 }

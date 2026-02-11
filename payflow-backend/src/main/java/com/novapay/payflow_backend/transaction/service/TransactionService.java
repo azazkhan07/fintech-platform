@@ -5,4 +5,5 @@ import com.novapay.payflow_backend.transaction.dto.response.TransactionResponse;
 
 public interface TransactionService {
     TransactionResponse transferMoney(TransactionRequest request);
+    TransactionResponse getTransactionByReferenceId(String referenceId);
 }
