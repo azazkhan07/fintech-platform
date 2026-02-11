@@ -3,6 +3,7 @@ package com.novapay.payflow_backend.transaction.service.impl;
 import com.novapay.payflow_backend.common.exception.ResourceNotFoundException;
 import com.novapay.payflow_backend.transaction.dto.request.TransactionRequest;
 import com.novapay.payflow_backend.transaction.dto.response.TransactionResponse;
+import com.novapay.payflow_backend.transaction.dto.response.TransactionStatusResponse;
 import com.novapay.payflow_backend.transaction.entity.Transaction;
 import com.novapay.payflow_backend.transaction.entity.enums.TransactionStatus;
 import com.novapay.payflow_backend.transaction.entity.enums.TransactionType;
@@ -122,5 +123,14 @@ public class TransactionServiceImpl implements TransactionService {
                 walletId, transactionsPage.getTotalElements());
 
         return transactionsPage.map(transactionMapper::toTransactionResponse);
+    }
+    @Transactional(readOnly = true)
+    @Override
+    public TransactionStatusResponse getTransactionStatusByReferenceId(String referenceId) {
+        LOGGER.info("Fetching transaction status by reference id {}", referenceId);
+        Transaction transaction = transactionRepository.findByReferenceId(referenceId).orElseThrow(()
+                -> new ResourceNotFoundException("Transaction not found with reference id " + referenceId));
+        LOGGER.info("Transaction status fetched successfully | referenceId={}", referenceId);
+        return new TransactionStatusResponse(transaction.getReferenceId(), transaction.getStatus().name());
     }
 }
