@@ -18,7 +18,7 @@ public record TransactionResponse(
         @Schema(example = "2026-02-06T12:30:00")
         LocalDateTime createdAt,
         @Schema(example = "Transaction Successful")
-        String remark,
+        String remarks,
         @Schema(example = "Payment transfer successful")
         String message
 

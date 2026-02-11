@@ -11,12 +11,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Transaction APIs", description = "Money transfer endpoints")
 @RestController
@@ -30,20 +31,50 @@ public class TransactionController {
 
     @Operation(summary = "Transfer money between wallets")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Transfer successful"),
-            @ApiResponse(responseCode = "400", description = "Invalid request / insufficient balance"),
-            @ApiResponse(responseCode = "404", description = "Wallet not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")})
+    @ApiResponse(responseCode = "200", description = "Transfer successful"),
+    @ApiResponse(responseCode = "400", description = "Invalid request / insufficient balance"),
+    @ApiResponse(responseCode = "404", description = "Wallet not found"),
+    @ApiResponse(responseCode = "500", description = "Internal server error")})
     @PostMapping("/transfer")
     public ResponseEntity<TransactionResponse> transferMoney(@Valid @RequestBody TransactionRequest transactionRequest) {
 
         LOGGER.info("Incoming transfer request | sender={} receiver={} amount={}",
-               transactionRequest.getSenderWalletId(),
+                transactionRequest.getSenderWalletId(),
                 transactionRequest.getReceiverWalletId(),
                 transactionRequest.getAmount());
         TransactionResponse transactionResponse = transactionService.transferMoney(transactionRequest);
 
         LOGGER.info("Transfer completed successfully referenceId: {}", transactionResponse.referenceId());
         return ResponseEntity.status(HttpStatus.OK).body(transactionResponse);
+    }
+
+    @Operation(summary = "Get transaction by reference id")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Transaction found"),
+    @ApiResponse(responseCode = "404", description = "Transaction not found")})
+    @GetMapping("/{referenceId}")
+    public ResponseEntity<TransactionResponse> getTransaction(@PathVariable String referenceId) {
+        TransactionResponse response = transactionService.getTransactionByReferenceId(referenceId);
+        LOGGER.info("Transaction found with referenceId: {}", referenceId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @Operation(summary = "Get wallet transaction history")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Transaction history fetched"),
+    @ApiResponse(responseCode = "404", description = "Wallet not found")})
+    @GetMapping("/wallet/{walletId}")
+    public ResponseEntity<Page<TransactionResponse>> getWalletHistory(
+            @PathVariable Long walletId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDirection) {
+
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.fromString(sortDirection), sortBy));
+
+        LOGGER.info("History request | walletId={}, page={}, size={} sortDirection={}", walletId, page, size, sortDirection);
+        return ResponseEntity.status(HttpStatus.OK).body(transactionService.getWalletTransactionHistory(walletId,pageable));
     }
 }
