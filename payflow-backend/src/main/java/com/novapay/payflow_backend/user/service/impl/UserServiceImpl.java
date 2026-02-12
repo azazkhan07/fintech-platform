@@ -13,13 +13,15 @@ import com.novapay.payflow_backend.user.mapper.UserMapper;
 import com.novapay.payflow_backend.user.repository.UserRepository;
 import com.novapay.payflow_backend.user.service.UserService;
 import com.novapay.payflow_backend.user.util.UserHelper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-
+@RequiredArgsConstructor
 @Transactional
 @Service
 public class UserServiceImpl implements UserService {
@@ -28,12 +30,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final UserHelper userHelper;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, UserHelper userHelper) {
-        this.userRepository = userRepository;
-        this.userMapper = userMapper;
-        this.userHelper = userHelper;
-    }
 
     @Transactional
     @Override
@@ -44,6 +42,7 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.toUserEntity(userRequest);
         user.setStatus(UserStatus.ACTIVE);
         user.setRole(Role.ROLE_USER);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         User saveUser = userRepository.save(user);
         LOGGER.info("User created with id {} and email {} ", user.getId(), user.getEmail());
         return userMapper.toResponseDTO(saveUser);

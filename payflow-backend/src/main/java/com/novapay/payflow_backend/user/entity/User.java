@@ -43,6 +43,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+    @Column(nullable = false)
+    private String password;
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
