@@ -1,5 +1,6 @@
 package com.novapay.payflow_backend.user.service.impl;
 
+import com.novapay.payflow_backend.auth.entity.enums.Role;
 import com.novapay.payflow_backend.user.dto.request.KycRequest;
 import com.novapay.payflow_backend.user.dto.request.UpdateUserRequest;
 import com.novapay.payflow_backend.user.dto.request.UserRequest;
@@ -42,6 +43,7 @@ public class UserServiceImpl implements UserService {
         }
         User user = userMapper.toUserEntity(userRequest);
         user.setStatus(UserStatus.ACTIVE);
+        user.setRole(Role.ROLE_USER);
         User saveUser = userRepository.save(user);
         LOGGER.info("User created with id {} and email {} ", user.getId(), user.getEmail());
         return userMapper.toResponseDTO(saveUser);
