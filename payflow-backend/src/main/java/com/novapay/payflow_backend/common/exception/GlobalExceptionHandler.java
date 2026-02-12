@@ -3,13 +3,11 @@ package com.novapay.payflow_backend.common.exception;
 import com.novapay.payflow_backend.common.dto.ApiError;
 import com.novapay.payflow_backend.user.exception.InvalidKycStateException;
 import com.novapay.payflow_backend.user.exception.UserAlreadyExistsException;
-import org.hibernate.property.access.spi.PropertyAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -97,28 +95,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(NullPointerException.class)
-    public ResponseEntity<ApiError> badRequest(NullPointerException nullPointerException) {
-        ApiError apiError = new ApiError(
-                HttpStatus.BAD_REQUEST.value(),
-                HttpStatus.BAD_REQUEST.name(),
-                nullPointerException.getMessage(),
-                LocalDateTime.now());
-        LOGGER.info("Bad Request: {}", nullPointerException.getMessage());
-        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(PropertyAccessException.class)
-    public ResponseEntity<ApiError> propertyAccessException(PropertyAccessException exception) {
-        ApiError apiError = new ApiError(
-                HttpStatus.BAD_REQUEST.value(),
-                HttpStatus.BAD_REQUEST.name(),
-                exception.getMessage(),
-                LocalDateTime.now());
-        LOGGER.info("Property Access Exception: {}", exception.getMessage());
-        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
-    }
-
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiError> illegalArgumentException(IllegalArgumentException exception) {
         ApiError apiError = new ApiError(
@@ -130,16 +106,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(JpaSystemException.class)
-    public ResponseEntity<ApiError> jpaSystemException(JpaSystemException exception) {
-        ApiError apiError = new ApiError(
-                HttpStatus.BAD_REQUEST.value(),
-                HttpStatus.BAD_REQUEST.name(),
-                exception.getMessage(),
-                LocalDateTime.now());
-        LOGGER.info("JpaSystem Exception: {}", exception.getMessage());
-        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
-    }
+
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiError>httpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException exception) {
         ApiError apiError = new ApiError(
@@ -153,14 +120,39 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDatabaseError(DataIntegrityViolationException ex) {
 
+        String message = "Database constraint violation";
+
+        if (ex.getMessage() != null) {
+            if (ex.getMessage().contains("transactions_type_check")) {
+                message = "Invalid transaction type. Database enum not updated.";
+            }
+            else if (ex.getMessage().contains("transactions_status_check")) {
+                message = "Invalid transaction status change.";
+            }
+            else if (ex.getMessage().contains("unique") || ex.getMessage().contains("duplicate")) {
+                message = "Duplicate data found.";
+            }
+        }
+
         ApiError error = new ApiError(
-                HttpStatus.CONFLICT.value(),
-                HttpStatus.CONFLICT.name(),
-                "Database constraint violation (duplicate or invalid data)",
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.name(),
+                message,
                 LocalDateTime.now());
 
-        LOGGER.error("Database error", ex);
-        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+        LOGGER.error("Database constraint violation", ex);
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiError> illegalStateException(IllegalStateException exception) {
+        ApiError apiError = new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.name(),
+                exception.getMessage(),
+                LocalDateTime.now());
+        LOGGER.warn("Illegal State Exception: {}", exception.getMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
 }
