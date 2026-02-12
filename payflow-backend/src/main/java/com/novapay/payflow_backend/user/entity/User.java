@@ -1,5 +1,6 @@
 package com.novapay.payflow_backend.user.entity;
 
+import com.novapay.payflow_backend.auth.entity.enums.Role;
 import com.novapay.payflow_backend.user.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -39,6 +40,9 @@ public class User {
     private String aadharNumber;
     @Column(name = "pan_number", unique = true)
     private String panNumber;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
