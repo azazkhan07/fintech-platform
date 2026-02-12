@@ -87,4 +87,15 @@ public class TransactionController {
         LOGGER.info("Fetching transaction status for referenceId: {}", referenceId);
         return ResponseEntity.status(HttpStatus.OK).body(transactionService.getTransactionStatusByReferenceId(referenceId));
     }
+
+    @Operation(summary = "Reverse a successful transaction")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Refund successfully"),
+            @ApiResponse(responseCode = "404", description = "transaction not found"),
+            @ApiResponse(responseCode = "400", description = "Transaction can not be reversed")})
+    @PutMapping("/reverse/{referenceId}")
+    public ResponseEntity<TransactionResponse> reverseTransaction(@PathVariable String referenceId) {
+        LOGGER.info("Reversal API called for referenceId: {}", referenceId);
+        TransactionResponse response = transactionService.reverseTransaction(referenceId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }

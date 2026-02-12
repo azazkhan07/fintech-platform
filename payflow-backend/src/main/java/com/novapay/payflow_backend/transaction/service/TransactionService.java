@@ -14,4 +14,6 @@ public interface TransactionService {
     Page<TransactionResponse> getWalletTransactionHistory(Long walletId, Pageable pageable);
 
     TransactionStatusResponse getTransactionStatusByReferenceId(String referenceId);
+
+    TransactionResponse reverseTransaction(String referenceId);
 }

@@ -104,6 +104,7 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = transactionRepository
                 .findByReferenceId(referenceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with reference " + referenceId));
+
         LOGGER.info("Transaction fetched successfully | referenceId={} status={} amount={}",
                 transaction.getReferenceId(),
                 transaction.getStatus(),
@@ -124,6 +125,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         return transactionsPage.map(transactionMapper::toTransactionResponse);
     }
+
     @Transactional(readOnly = true)
     @Override
     public TransactionStatusResponse getTransactionStatusByReferenceId(String referenceId) {
@@ -132,5 +134,63 @@ public class TransactionServiceImpl implements TransactionService {
                 -> new ResourceNotFoundException("Transaction not found with reference id " + referenceId));
         LOGGER.info("Transaction status fetched successfully | referenceId={}", referenceId);
         return new TransactionStatusResponse(transaction.getReferenceId(), transaction.getStatus().name());
+    }
+
+    @Transactional
+    @Override
+    public TransactionResponse reverseTransaction(String referenceId) {
+
+        LOGGER.info("Reversal request received with reference {}", referenceId);
+
+        Transaction successTransaction = transactionRepository.findByReferenceId(referenceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with reference id " + referenceId));
+
+        if (successTransaction.getStatus() == TransactionStatus.REVERSED) {
+            throw new IllegalStateException("Transaction already reversed with referenceId " + referenceId + successTransaction.getStatus());
+        }
+
+        if (successTransaction.getStatus() != TransactionStatus.SUCCESS) {
+            throw new IllegalStateException("Only success Transaction status  can be reversed not with referenceId");
+        }
+
+        WalletBalance senderBalance = wallentBalanceRepository.findByWalletId(successTransaction.getSenderWalletId())
+                .orElseThrow(() -> new ResourceNotFoundException("Sender wallet not found"));
+
+        WalletBalance receiverBalance = wallentBalanceRepository.findByWalletId(successTransaction.getReceiverWalletId())
+                .orElseThrow(() -> new ResourceNotFoundException("Receiver wallet not found"));
+
+        BigDecimal amount = successTransaction.getAmount();
+
+        if (receiverBalance.getAvailableBalance().compareTo(amount) < 0) {
+            throw new IllegalStateException("Reversal failed: receiver has insufficient balance");
+        }
+
+        receiverBalance.setAvailableBalance(
+                receiverBalance.getAvailableBalance().subtract(amount));
+
+        senderBalance.setAvailableBalance(
+                senderBalance.getAvailableBalance().add(amount));
+
+        wallentBalanceRepository.save(senderBalance);
+        wallentBalanceRepository.save(receiverBalance);
+
+        Transaction reversalTransaction = Transaction.builder()
+                .senderWalletId(successTransaction.getReceiverWalletId())
+                .receiverWalletId(successTransaction.getSenderWalletId())
+                .amount(amount)
+                .type(TransactionType.REVERSAL)
+                .status(TransactionStatus.SUCCESS)
+                .message("Transaction Reversed Successfully")
+                .remarks("Reversal of " + referenceId)
+                .build();
+
+        Transaction savedReversal = transactionRepository.save(reversalTransaction);
+
+        successTransaction.setStatus(TransactionStatus.REVERSED);
+        transactionRepository.save(successTransaction);
+
+        LOGGER.info("Transaction reversed successfully | originalReferenceId={} reversalReferenceId={}", referenceId, savedReversal.getReferenceId());
+
+        return transactionMapper.toTransactionResponse(savedReversal);
     }
 }
