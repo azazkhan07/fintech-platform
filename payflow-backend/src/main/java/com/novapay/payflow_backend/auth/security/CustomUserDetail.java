@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class UserSecurity implements UserDetails {
+public class CustomUserDetail implements UserDetails {
 
     private final User user;
 
@@ -46,6 +46,6 @@ public class UserSecurity implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return user.isEnabled();
     }
 }

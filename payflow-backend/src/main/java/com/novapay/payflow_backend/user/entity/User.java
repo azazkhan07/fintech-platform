@@ -45,6 +45,8 @@ public class User {
     private Role role;
     @Column(nullable = false)
     private String password;
+    @Column(nullable = false)
+    private boolean isEnabled = true;
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
