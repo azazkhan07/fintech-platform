@@ -8,6 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -108,7 +111,7 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ApiError>httpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException exception) {
+    public ResponseEntity<ApiError> httpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException exception) {
         ApiError apiError = new ApiError(
                 HttpStatus.BAD_REQUEST.value(),
                 HttpStatus.BAD_REQUEST.name(),
@@ -117,6 +120,7 @@ public class GlobalExceptionHandler {
         LOGGER.info("Method Not Supported: {}", exception.getMessage());
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDatabaseError(DataIntegrityViolationException ex) {
 
@@ -125,11 +129,9 @@ public class GlobalExceptionHandler {
         if (ex.getMessage() != null) {
             if (ex.getMessage().contains("transactions_type_check")) {
                 message = "Invalid transaction type. Database enum not updated.";
-            }
-            else if (ex.getMessage().contains("transactions_status_check")) {
+            } else if (ex.getMessage().contains("transactions_status_check")) {
                 message = "Invalid transaction status change.";
-            }
-            else if (ex.getMessage().contains("unique") || ex.getMessage().contains("duplicate")) {
+            } else if (ex.getMessage().contains("unique") || ex.getMessage().contains("duplicate")) {
                 message = "Duplicate data found.";
             }
         }
@@ -155,4 +157,52 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ApiError> unauthorized(UnauthorizedException exception) {
+        ApiError apiError = new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.name(),
+                exception.getMessage(),
+                LocalDateTime.now());
+        LOGGER.warn("Unauthorized Exception: {}", exception.getMessage());
+        return new ResponseEntity<>(apiError, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiError> handleBadCredentials(BadCredentialsException exception) {
+
+        ApiError error = new ApiError(
+                HttpStatus.UNAUTHORIZED.value(),
+                HttpStatus.UNAUTHORIZED.name(),
+                exception.getMessage(),
+                LocalDateTime.now());
+
+        LOGGER.warn("Bad credentials login attempt");
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<ApiError> handleLockedUser(LockedException exception) {
+
+        ApiError error = new ApiError(
+                HttpStatus.UNAUTHORIZED.value(),
+                HttpStatus.UNAUTHORIZED.name(),
+                exception.getMessage(),
+                LocalDateTime.now());
+        LOGGER.warn("Locked user login attempt");
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex) {
+
+        ApiError error = new ApiError(
+                HttpStatus.FORBIDDEN.value(),
+                HttpStatus.FORBIDDEN.name(),
+                "You do not have permission to access this resource",
+                LocalDateTime.now());
+
+        LOGGER.warn("Access denied: {}", ex.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
+    }
 }

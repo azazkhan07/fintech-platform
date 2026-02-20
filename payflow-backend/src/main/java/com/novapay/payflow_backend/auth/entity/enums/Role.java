@@ -1,7 +1,7 @@
 package com.novapay.payflow_backend.auth.entity.enums;
 
 public enum Role {
-    ROLE_USER,
-    ROLE_ADMIN,
-    ROLE_SUPPORT
+    USER,
+    ADMIN,
+    SUPPORT
 }

@@ -40,8 +40,9 @@ public class UserServiceImpl implements UserService {
             throw new UserAlreadyExistsException("User already exists with email " + userRequest.getEmail());
         }
         User user = userMapper.toUserEntity(userRequest);
-        user.setStatus(UserStatus.ACTIVE);
-        user.setRole(Role.ROLE_USER);
+        user.setRole(Role.USER);
+        user.setEnabled(true);
+        user.setStatus(UserStatus.CREATED);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User saveUser = userRepository.save(user);
         LOGGER.info("User created with id {} and email {} ", user.getId(), user.getEmail());
