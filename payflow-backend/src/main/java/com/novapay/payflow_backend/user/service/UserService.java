@@ -18,4 +18,5 @@ public interface UserService {
     Boolean getKycStatus(Long userId);
 
     void verifyKyc(Long  userId);
+
 }

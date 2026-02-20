@@ -43,10 +43,13 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+    @Column(nullable = false)
+    private String password;
+    @Column(nullable = false)
+    private boolean enabled = true;
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
         this.kycVerified = false;
-        this.status = UserStatus.CREATED;
     }
 }
