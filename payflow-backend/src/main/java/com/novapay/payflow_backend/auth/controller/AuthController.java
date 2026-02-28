@@ -5,7 +5,7 @@ import com.novapay.payflow_backend.auth.dto.request.RefreshTokenRequest;
 import com.novapay.payflow_backend.auth.dto.request.RegisterRequest;
 import com.novapay.payflow_backend.auth.dto.response.JwtResponse;
 import com.novapay.payflow_backend.auth.service.AuthService;
-import com.novapay.payflow_backend.common.exception.UnauthorizedException;
+import com.novapay.payflow_backend.auth.exception.UnauthorizedException;
 import com.novapay.payflow_backend.user.dto.response.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

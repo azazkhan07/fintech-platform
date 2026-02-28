@@ -9,7 +9,7 @@ import com.novapay.payflow_backend.auth.service.AuthService;
 import com.novapay.payflow_backend.auth.service.JwtService;
 import com.novapay.payflow_backend.auth.service.TokenBlackListService;
 import com.novapay.payflow_backend.common.exception.ResourceNotFoundException;
-import com.novapay.payflow_backend.common.exception.UnauthorizedException;
+import com.novapay.payflow_backend.auth.exception.UnauthorizedException;
 import com.novapay.payflow_backend.user.dto.request.UserRequest;
 import com.novapay.payflow_backend.user.dto.response.UserResponse;
 import com.novapay.payflow_backend.user.entity.User;
