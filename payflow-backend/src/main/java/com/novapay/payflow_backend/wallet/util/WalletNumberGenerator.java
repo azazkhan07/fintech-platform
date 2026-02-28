@@ -1,4 +1,4 @@
-package com.novapay.payflow_backend.common.util.generator;
+package com.novapay.payflow_backend.wallet.util;
 
 import org.springframework.stereotype.Component;
 import java.util.UUID;

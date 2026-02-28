@@ -1,4 +1,4 @@
-package com.novapay.payflow_backend.common.util.validator;
+package com.novapay.payflow_backend.wallet.util;
 
 import com.novapay.payflow_backend.common.exception.ResourceNotFoundException;
 import com.novapay.payflow_backend.wallet.entity.Wallet;

@@ -2,7 +2,7 @@ package com.novapay.payflow_backend.wallet.service.impl;
 
 import com.novapay.payflow_backend.common.exception.ResourceNotFoundException;
 import com.novapay.payflow_backend.common.exception.WalletAlreadyExistsException;
-import com.novapay.payflow_backend.common.util.generator.WalletNumberGenerator;
+import com.novapay.payflow_backend.wallet.util.WalletNumberGenerator;
 import com.novapay.payflow_backend.wallet.dto.response.WalletResponse;
 import com.novapay.payflow_backend.wallet.entity.Wallet;
 import com.novapay.payflow_backend.wallet.entity.WalletBalance;
