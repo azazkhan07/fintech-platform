@@ -1,4 +1,4 @@
-package com.novapay.payflow_backend.common.exception;
+package com.novapay.payflow_backend.auth.exception;
 
 public class UnauthorizedException extends RuntimeException{
     public UnauthorizedException(String message) {

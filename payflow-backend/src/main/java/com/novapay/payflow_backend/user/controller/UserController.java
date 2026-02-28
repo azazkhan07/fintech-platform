@@ -1,7 +1,7 @@
 package com.novapay.payflow_backend.user.controller;
 
 import com.novapay.payflow_backend.common.dto.ApiMessage;
-import com.novapay.payflow_backend.common.dto.KycStatusResponse;
+import com.novapay.payflow_backend.wallet.dto.response.KycStatusResponse;
 import com.novapay.payflow_backend.user.dto.request.KycRequest;
 import com.novapay.payflow_backend.user.dto.request.UpdateUserRequest;
 import com.novapay.payflow_backend.user.dto.request.UserRequest;

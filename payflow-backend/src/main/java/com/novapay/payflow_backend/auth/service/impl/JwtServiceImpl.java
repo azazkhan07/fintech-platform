@@ -1,7 +1,7 @@
 package com.novapay.payflow_backend.auth.service.impl;
 
 import com.novapay.payflow_backend.auth.service.JwtService;
-import com.novapay.payflow_backend.common.exception.UnauthorizedException;
+import com.novapay.payflow_backend.auth.exception.UnauthorizedException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

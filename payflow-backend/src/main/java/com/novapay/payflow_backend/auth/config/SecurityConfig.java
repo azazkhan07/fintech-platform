@@ -1,4 +1,4 @@
-package com.novapay.payflow_backend.config;
+package com.novapay.payflow_backend.auth.config;
 
 import com.novapay.payflow_backend.auth.security.JwtAuthenticationEntryPoint;
 import com.novapay.payflow_backend.auth.security.JwtAuthenticationFilter;
