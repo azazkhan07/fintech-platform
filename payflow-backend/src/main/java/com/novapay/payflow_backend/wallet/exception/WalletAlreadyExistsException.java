@@ -1,4 +1,4 @@
-package com.novapay.payflow_backend.common.exception;
+package com.novapay.payflow_backend.wallet.exception;
 
 public class WalletAlreadyExistsException extends RuntimeException {
 

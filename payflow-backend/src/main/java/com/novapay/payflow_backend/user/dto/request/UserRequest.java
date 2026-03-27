@@ -1,6 +1,6 @@
 package com.novapay.payflow_backend.user.dto.request;
 
-import com.novapay.payflow_backend.user.enums.UserStatus;
+
 import com.novapay.payflow_backend.user.util.ValidGender;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
@@ -25,6 +25,7 @@ public class UserRequest {
     @Min(value = 18,message = "User must be at least 18")
     @Max(value = 99,message = "Age must be below 100")
     private int age;
-    @NotNull(message = "Status is Required")
-    private UserStatus status;
+    @NotBlank(message = "Password is required")
+    @Size(min = 6, message = "Password must be at least 6 characters")
+    private String password;
 }
